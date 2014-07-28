@@ -1,0 +1,9 @@
+C:\Users\ChiaHu\Desktop\huangwc_desktop\dev.sh_d\實中不及格名單\bin\Debug\JH.IBSH.FailPeriodicalExamList.dll
+C:\Users\ChiaHu\Desktop\huangwc_desktop\dev.sh_d\實中不及格名單\bin\Debug\JH.IBSH.FailPeriodicalExamList.pdb
+C:\Users\ChiaHu\Desktop\huangwc_desktop\dev.sh_d\實中不及格名單\obj\Debug\JH.IBSH.FailPeriodicalExamList.Config.resources
+C:\Users\ChiaHu\Desktop\huangwc_desktop\dev.sh_d\實中不及格名單\obj\Debug\JH.IBSH.FailPeriodicalExamList.MainForm.resources
+C:\Users\ChiaHu\Desktop\huangwc_desktop\dev.sh_d\實中不及格名單\obj\Debug\JH.IBSH.FailPeriodicalExamList.Properties.Resources.resources
+C:\Users\ChiaHu\Desktop\huangwc_desktop\dev.sh_d\實中不及格名單\obj\Debug\實中不及格名單.csproj.GenerateResource.Cache
+C:\Users\ChiaHu\Desktop\huangwc_desktop\dev.sh_d\實中不及格名單\obj\Debug\JH.IBSH.FailPeriodicalExamList.dll
+C:\Users\ChiaHu\Desktop\huangwc_desktop\dev.sh_d\實中不及格名單\obj\Debug\JH.IBSH.FailPeriodicalExamList.pdb
+C:\Users\ChiaHu\Desktop\huangwc_desktop\dev.sh_d\實中不及格名單\obj\Debug\實中不及格名單.csprojResolveAssemblyReference.cache
