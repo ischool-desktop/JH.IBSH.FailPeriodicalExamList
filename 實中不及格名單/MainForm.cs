@@ -21,14 +21,25 @@ namespace JH.IBSH.FailPeriodicalExamList
         private BackgroundWorker _bgw = new BackgroundWorker();
         private const string configList = "JH.IBSH.FailPeriodicalExamList.Config.1.List";
         private const string configSingle = "JH.IBSH.FailPeriodicalExamList.Config.1.Single";
-        private string reportName = "不及格名單";
+        private string reportName = "";
         public static ReportConfiguration ReportConfigurationList = new Campus.Report.ReportConfiguration(configList);
         public static ReportConfiguration ReportConfigurationSingle = new Campus.Report.ReportConfiguration(configSingle);
-        private bool isAll = false;
+        private mainFormConfig config;
+        public class mainFormConfig {
+            public mainFormFrom from;
+            public bool hasList;
+            public bool hasSingle;
+            public string formName;
+        }
+        public enum mainFormFrom { 
+            Student ,
+            Class 
+        }
         class filter
         {
             public SchoolYearSemester sys;
             public int exam;
+            public string examText;
         }
         public static CourseGradeB.Tool.SubjectType StringToSubjectType(string type)
         {
@@ -42,11 +53,11 @@ namespace JH.IBSH.FailPeriodicalExamList
                     return CourseGradeB.Tool.SubjectType.Regular;
             }
         }
-        public MainForm(bool isAll=false)
+        public MainForm(mainFormConfig config)
         {
             InitializeComponent();
             #region 設定comboBox選單
-            foreach (int item in Enumerable.Range(int.Parse(School.DefaultSchoolYear) - 5, 5))
+            foreach (int item in Enumerable.Range(int.Parse(School.DefaultSchoolYear) - 11, 13))
             {
                 comboBoxEx2.Items.Add(item);
             }
@@ -54,15 +65,17 @@ namespace JH.IBSH.FailPeriodicalExamList
             {
                 comboBoxEx3.Items.Add(item);
             }
-            foreach (string item in new string[] { "1", "2" })
+            foreach (string item in new string[] { "Midterm", "Final" })
             {
                 comboBoxEx4.Items.Add(item);
             }
             #endregion
-            comboBoxEx2.SelectedText = School.DefaultSchoolYear;
-            comboBoxEx3.SelectedText = School.DefaultSemester;
-            comboBoxEx4.SelectedText = "1";
-            this.isAll = isAll;
+            this.reportName = config.formName;
+            this.Text = config.formName;
+            comboBoxEx2.Text = School.DefaultSchoolYear;
+            comboBoxEx3.Text = School.DefaultSemester;
+            comboBoxEx4.SelectedIndex = 0;
+            this.config = config;
             _bgw.DoWork += new DoWorkEventHandler(_bgw_DoWork);
             _bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(_bgw_RunWorkerCompleted);
         }
@@ -72,16 +85,22 @@ namespace JH.IBSH.FailPeriodicalExamList
         }
         private void btnPrint_Click(object sender, EventArgs e)
         {
-            if (!this.isAll && K12.Presentation.NLDPanels.Class.SelectedSource.Count < 1)
+            if (config.from == mainFormFrom.Class && K12.Presentation.NLDPanels.Class.SelectedSource.Count < 1)
             {
                 FISCA.Presentation.Controls.MsgBox.Show("請先選擇班級");
+                return;
+            }
+            else if (config.from == mainFormFrom.Student && K12.Presentation.NLDPanels.Student.SelectedSource.Count < 1)
+            {
+                FISCA.Presentation.Controls.MsgBox.Show("請先選擇學生");
                 return;
             }
             btnPrint.Enabled = false;
             _bgw.RunWorkerAsync(new filter
                 {
                     sys = new SchoolYearSemester(int.Parse(comboBoxEx2.Text), int.Parse(comboBoxEx3.Text)),
-                    exam = int.Parse(comboBoxEx4.Text)
+                    exam = comboBoxEx4.Text == "Midterm" ? 1 : 2,
+                    examText = comboBoxEx4.Text,
                 }
             );
         }
@@ -95,15 +114,26 @@ namespace JH.IBSH.FailPeriodicalExamList
             Document templateSingle = (ReportConfigurationSingle.Template != null)
                 ? ReportConfigurationSingle.Template.ToDocument()
                 : new Campus.Report.ReportTemplate(Properties.Resources.通知單樣版, Campus.Report.TemplateType.Word).ToDocument();
-            if (!this.isAll && K12.Presentation.NLDPanels.Class.SelectedSource.Count < 1)
-                return;
-            List<string> cids = isAll ?
-                  K12.Data.Class.SelectAll().Select(x => x.ID).ToList()
-                : K12.Presentation.NLDPanels.Class.SelectedSource;
-
+            //List<string> cids = isAll ?
+            //      K12.Data.Class.SelectAll().Select(x => x.ID).ToList()
+            //    : K12.Presentation.NLDPanels.Class.SelectedSource;
+            List<StudentRecord> srl ;
+            switch (config.from)
+            {
+                case mainFormFrom.Class:
+                    srl = K12.Data.Student.SelectByClassIDs(K12.Presentation.NLDPanels.Class.SelectedSource);
+                    break;
+                case mainFormFrom.Student:
+                   srl = K12.Data.Student.SelectByIDs(K12.Presentation.NLDPanels.Student.SelectedSource);
+                   break;
+                default :
+                   return;
+            }
+            List<string> sids  = srl.Select(x => x.ID).ToList();
             int SchoolYear = f.sys.SchoolYear;
             int Semester = f.sys.Semester;
             int Exam = f.exam;
+            string ExamText = f.examText;
 
             DataTable dt = tool._Q.Select(@"select student.id,student.english_name,student.name,student.student_number,student.seat_no,class.class_name,teacher.teacher_name,teacher.contact_phone as teacher_contact_phone,class.grade_year,course.id as course_id,course.period as period,course.credit as credit,course.subject as subject,$ischool.subject.list.group as group,$ischool.subject.list.type as type,$ischool.subject.list.english_name as subject_english_name,sc_attend.ref_student_id as student_id,sce_take.ref_sc_attend_id as sc_attend_id,sce_take.ref_exam_id as exam_id,xpath_string(sce_take.extension,'//Score') as score 
 from sc_attend
@@ -114,7 +144,7 @@ left join student on student.id=sc_attend.ref_student_id
 left join class on student.ref_class_id=class.id
 left join $ischool.subject.list on course.subject=$ischool.subject.list.name 
 left join teacher on teacher.id=class.ref_teacher_id
-where class.id in (" + string.Join(",", cids) + ") and course.school_year=" + SchoolYear + " and course.semester=" + Semester + " and sce_take.ref_exam_id = " + Exam + " and cast('0'||xpath_string(sce_take.extension,'//Score') as numeric ) < 60");
+where student.id in (" + string.Join(",", sids) + ") and course.school_year=" + SchoolYear + " and course.semester=" + Semester + " and sce_take.ref_exam_id = " + Exam + " and cast('0'||xpath_string(sce_take.extension,'//Score') as numeric ) < 60");
             Dictionary<string, List<CustomSCETakeRecord>> dscetr = new Dictionary<string, List<CustomSCETakeRecord>>();
             foreach (DataRow row in dt.Rows)
             {
@@ -149,7 +179,7 @@ where class.id in (" + string.Join(",", cids) + ") and course.school_year=" + Sc
                 });
             }
             Dictionary<string, object> mailmerge = new Dictionary<string, object>();
-            List<StudentRecord> srl = K12.Data.Student.SelectByClassIDs(cids);
+            
             Dictionary<string, ParentRecord> dpr = K12.Data.Parent.SelectByStudents(srl).ToDictionary(x => x.RefStudentID, x => x);
             srl.Sort(delegate(StudentRecord a, StudentRecord b)
             {
@@ -219,7 +249,7 @@ where class.id in (" + string.Join(",", cids) + ") and course.school_year=" + Sc
                 }
                 mailmerge.Add("學年", SchoolYear);
                 mailmerge.Add("學期", Semester);
-                mailmerge.Add("學段", Exam);
+                mailmerge.Add("學段", ExamText);
                 mailmerge.Add("班級", sr.Class.Name);
                 mailmerge.Add("座號", sr.SeatNo);
                 mailmerge.Add("姓名", sr.Name);
@@ -231,14 +261,15 @@ where class.id in (" + string.Join(",", cids) + ") and course.school_year=" + Sc
 
                 table2.Rows[table2.Rows.Count - 1].Remove();
                 each.MailMerge.Execute(mailmerge.Keys.ToArray(), mailmerge.Values.ToArray());
-                document.Sections.Add(document.ImportNode(each.FirstSection, true));
+                if ( config.hasSingle )
+                    document.Sections.Add(document.ImportNode(each.FirstSection, true));
             }
             table.Rows[table.Rows.Count - 1].Remove();
             Dictionary<string, object> listmailmerge = new Dictionary<string, object>();
             listmailmerge.Add("列印日期", DateTime.Now.AddYears(-1911).ToString("yyy年M月d日"));
             listmailmerge.Add("學年度", SchoolYear);
             listmailmerge.Add("學期", Semester);
-            listmailmerge.Add("學段", Exam);
+            listmailmerge.Add("學段", ExamText);
             string 學段_長 = "";
             switch (Exam)
             {
@@ -251,7 +282,8 @@ where class.id in (" + string.Join(",", cids) + ") and course.school_year=" + Sc
             }
             listmailmerge.Add("學段_長", 學段_長);
             list.MailMerge.Execute(listmailmerge.Keys.ToArray(), listmailmerge.Values.ToArray());
-            document.Sections.Insert(1, document.ImportNode(list.FirstSection, true));
+            if ( config.hasList )
+                document.Sections.Insert(1, document.ImportNode(list.FirstSection, true));
 
             document.Sections.RemoveAt(0);
             e.Result = document;

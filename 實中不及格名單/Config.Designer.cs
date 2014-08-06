@@ -39,7 +39,7 @@
             this.linkLabel1.AutoSize = true;
             this.linkLabel1.BackColor = System.Drawing.Color.Transparent;
             this.linkLabel1.Font = new System.Drawing.Font("微軟正黑體", 9.75F);
-            this.linkLabel1.Location = new System.Drawing.Point(79, 15);
+            this.linkLabel1.Location = new System.Drawing.Point(139, 15);
             this.linkLabel1.Name = "linkLabel1";
             this.linkLabel1.Size = new System.Drawing.Size(60, 17);
             this.linkLabel1.TabIndex = 11;
@@ -52,7 +52,7 @@
             this.linkLabel2.AutoSize = true;
             this.linkLabel2.BackColor = System.Drawing.Color.Transparent;
             this.linkLabel2.Font = new System.Drawing.Font("微軟正黑體", 9.75F);
-            this.linkLabel2.Location = new System.Drawing.Point(79, 42);
+            this.linkLabel2.Location = new System.Drawing.Point(139, 42);
             this.linkLabel2.Name = "linkLabel2";
             this.linkLabel2.Size = new System.Drawing.Size(60, 17);
             this.linkLabel2.TabIndex = 12;
@@ -72,9 +72,9 @@
             this.labelX2.Font = new System.Drawing.Font("微軟正黑體", 9.75F);
             this.labelX2.Location = new System.Drawing.Point(12, 12);
             this.labelX2.Name = "labelX2";
-            this.labelX2.Size = new System.Drawing.Size(54, 21);
+            this.labelX2.Size = new System.Drawing.Size(74, 21);
             this.labelX2.TabIndex = 20;
-            this.labelX2.Text = "Gr. 3~6";
+            this.labelX2.Text = "不及格名單";
             // 
             // labelX1
             // 
@@ -88,15 +88,15 @@
             this.labelX1.Font = new System.Drawing.Font("微軟正黑體", 9.75F);
             this.labelX1.Location = new System.Drawing.Point(12, 39);
             this.labelX1.Name = "labelX1";
-            this.labelX1.Size = new System.Drawing.Size(54, 21);
+            this.labelX1.Size = new System.Drawing.Size(114, 21);
             this.labelX1.TabIndex = 21;
-            this.labelX1.Text = "Gr. 7~8";
+            this.labelX1.Text = "成績不及格通知單";
             // 
             // Config
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(169, 111);
+            this.ClientSize = new System.Drawing.Size(213, 74);
             this.Controls.Add(this.labelX1);
             this.Controls.Add(this.labelX2);
             this.Controls.Add(this.linkLabel2);

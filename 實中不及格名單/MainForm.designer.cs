@@ -132,14 +132,15 @@
             this.labelX4.Font = new System.Drawing.Font("微軟正黑體", 9.75F);
             this.labelX4.Location = new System.Drawing.Point(12, 73);
             this.labelX4.Name = "labelX4";
-            this.labelX4.Size = new System.Drawing.Size(34, 21);
+            this.labelX4.Size = new System.Drawing.Size(48, 21);
             this.labelX4.TabIndex = 22;
-            this.labelX4.Text = "學段";
+            this.labelX4.Text = "Period";
             // 
             // comboBoxEx4
             // 
             this.comboBoxEx4.DisplayMember = "Text";
             this.comboBoxEx4.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.comboBoxEx4.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxEx4.FormattingEnabled = true;
             this.comboBoxEx4.ItemHeight = 19;
             this.comboBoxEx4.Location = new System.Drawing.Point(105, 69);
