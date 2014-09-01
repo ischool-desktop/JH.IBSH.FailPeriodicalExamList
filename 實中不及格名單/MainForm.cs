@@ -144,18 +144,20 @@ left join student on student.id=sc_attend.ref_student_id
 left join class on student.ref_class_id=class.id
 left join $ischool.subject.list on course.subject=$ischool.subject.list.name 
 left join teacher on teacher.id=class.ref_teacher_id
-where student.id in (" + string.Join(",", sids) + ") and course.school_year=" + SchoolYear + " and course.semester=" + Semester + " and sce_take.ref_exam_id = " + Exam + " and cast('0'||xpath_string(sce_take.extension,'//Score') as numeric ) < 60");
+where student.id in (" + string.Join(",", sids) + ") and course.school_year=" + SchoolYear + " and course.semester=" + Semester + " and sce_take.ref_exam_id = " + Exam + " --and cast('0'||xpath_string(sce_take.extension,'//Score') as numeric ) < 60");
             Dictionary<string, List<CustomSCETakeRecord>> dscetr = new Dictionary<string, List<CustomSCETakeRecord>>();
             foreach (DataRow row in dt.Rows)
             {
                 string id = "" + row["id"];
-                if (!dscetr.ContainsKey(id))
-                    dscetr.Add(id, new List<CustomSCETakeRecord>());
-                int tmp_period, tmp_credit;
                 decimal tmp_score;
+                int tmp_period, tmp_credit;
                 decimal.TryParse("" + row["score"], out tmp_score);
                 int.TryParse("" + row["period"], out tmp_period);
                 int.TryParse("" + row["credit"], out tmp_credit);
+                if (tmp_score >= 60)
+                    continue;
+                if (!dscetr.ContainsKey(id))
+                    dscetr.Add(id, new List<CustomSCETakeRecord>());
                 dscetr[id].Add(new CustomSCETakeRecord()
                 {
                     RefStudentID = id,
@@ -247,9 +249,13 @@ where student.id in (" + string.Join(",", sids) + ") and course.school_year=" + 
                 {
                     mailmerge["家長姓名"] = dpr[sr.ID].CustodianName;
                 }
-                mailmerge.Add("學年", SchoolYear);
+                //mailmerge.Add("學年", SchoolYear);
+                //mailmerge.Add("學年", (SchoolYear + 1911) + "-" + (SchoolYear + 1912));
+                mailmerge.Add("學年", SchoolYear + 1911);
                 mailmerge.Add("學期", Semester);
                 mailmerge.Add("學段", ExamText);
+                mailmerge.Add("學生系統編號", sr.ID);
+                mailmerge.Add("學號", sr.StudentNumber);
                 mailmerge.Add("班級", sr.Class.Name);
                 mailmerge.Add("座號", sr.SeatNo);
                 mailmerge.Add("姓名", sr.Name);
@@ -267,17 +273,18 @@ where student.id in (" + string.Join(",", sids) + ") and course.school_year=" + 
             table.Rows[table.Rows.Count - 1].Remove();
             Dictionary<string, object> listmailmerge = new Dictionary<string, object>();
             listmailmerge.Add("列印日期", DateTime.Now.AddYears(-1911).ToString("yyy年M月d日"));
-            listmailmerge.Add("學年度", SchoolYear);
+            //listmailmerge.Add("學年度", SchoolYear);
+            listmailmerge.Add("學年度", (SchoolYear + 1911) + "-" + (SchoolYear + 1912));
             listmailmerge.Add("學期", Semester);
             listmailmerge.Add("學段", ExamText);
             string 學段_長 = "";
             switch (Exam)
             {
                 case 1:
-                    學段_長 = "第一次段考";
+                    學段_長 = "Midterm";
                     break;
                 case 2:
-                    學段_長 = "第二次段考";
+                    學段_長 = "Final";
                     break;
             }
             listmailmerge.Add("學段_長", 學段_長);
